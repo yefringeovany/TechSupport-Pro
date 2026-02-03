@@ -5,6 +5,12 @@ const app = express();
 
 const PORT = 3000;
 
+import ticketsRoutes from "./modules/tickets/tickets.routes.js"
+
+
+
+
+app.use("/api/tickets", ticketsRoutes);
 /**
  * Arranque del servidor
  */
