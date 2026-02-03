@@ -6,11 +6,13 @@ const app = express();
 const PORT = 3000;
 
 import ticketsRoutes from "./modules/tickets/tickets.routes.js"
+import clientesRoutes from "./modules/clients/clientes.routes.js"
 
-
+app.use(express.json());
 
 
 app.use("/api/tickets", ticketsRoutes);
+app.use("/api/clientes", clientesRoutes);
 /**
  * Arranque del servidor
  */
