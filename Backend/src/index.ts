@@ -2,10 +2,6 @@ import express from 'express';
 import { connectDatabases } from './config/database.config.js';
 
 const app = express();
-app.get('/', (req, res) => {
-  res.send('🚀 Backend funcionando correctamente');
-});
-
 
 const PORT = 3000;
 
