@@ -9,12 +9,14 @@ const PORT = 3000;
 
 import ticketsRoutes from "./modules/tickets/tickets.routes.js"
 import clientesRoutes from "./modules/clients/clientes.routes.js"
+import agentesRoutes from "./modules/agents/agentes.routes.js"
 
 app.use(express.json());
 
 
 app.use("/api/tickets", ticketsRoutes);
 app.use("/api/clientes", clientesRoutes);
+app.use("/api/agentes", agentesRoutes);
 /**
  * Arranque del servidor
  */
