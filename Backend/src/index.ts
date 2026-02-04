@@ -1,5 +1,7 @@
 import express from 'express';
 import { connectDatabases } from './config/database.config.js';
+import "./cron/tickets.cron.js";
+
 
 const app = express();
 
