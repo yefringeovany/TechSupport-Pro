@@ -15,7 +15,7 @@ cron.schedule("*/5 * * * *", async () => {
     
 
     // ===============================
-    // ✅ ESCALAR TICKETS VIP
+    // ESCALAR TICKETS VIP
     // ===============================
     const escalados = await prisma.ticket.updateMany({
       where: {
@@ -31,11 +31,11 @@ cron.schedule("*/5 * * * *", async () => {
     });
 
     if (escalados.count > 0) {
-      console.log(`🚨 Tickets VIP escalados automáticamente: ${escalados.count}`);
+      console.log(`Tickets VIP escalados automáticamente: ${escalados.count}`);
     }
 
     // ===============================
-    // ✅ NOTIFICAR TICKETS NORMALES
+    // NOTIFICAR TICKETS NORMALES
     // ===============================
     const normales = await prisma.ticket.findMany({
       where: {
@@ -51,14 +51,14 @@ cron.schedule("*/5 * * * *", async () => {
     });
 
     if (normales.length > 0) {
-      console.log(`⚠️ ${normales.length} tickets normales sin atender por más de 5 minutos`);
+      console.log(`${normales.length} tickets normales sin atender por más de 5 minutos`);
       normales.forEach(ticket => {
-        console.log(`📢 Notificar supervisor -> Ticket ID: ${ticket.id}`);
+        console.log(`Notificar supervisor -> Ticket ID: ${ticket.id}`);
       });
     }
 
   } catch (error) {
-    console.error("❌ Error en cron de tickets:", error);
+    console.error("Error en cron de tickets:", error);
   }
 
 });
