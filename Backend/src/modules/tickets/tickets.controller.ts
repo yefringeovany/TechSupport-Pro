@@ -52,7 +52,7 @@ export class TicketsController {
     }
   }
 
-  // 🔥 Asignar ticket a agente
+  // Asignar ticket a agente
   static async asignar(req: Request, res: Response) {
     try {
       const ticketId = Number(req.params.id);
@@ -65,7 +65,7 @@ export class TicketsController {
     }
   }
 
-  // 🔥 Resolver ticket
+  // Resolver ticket
   static async resolver(req: Request, res: Response) {
     try {
       const ticketId = Number(req.params.id);

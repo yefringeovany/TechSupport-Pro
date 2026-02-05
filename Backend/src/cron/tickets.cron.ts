@@ -3,7 +3,7 @@ import { prisma } from "../config/prisma.js";
 import { TicketStatus } from "@prisma/client";
 
 // Cron que corre cada minuto para revisar tickets
-cron.schedule("*/1 * * * *", async () => {
+cron.schedule("*/5 * * * *", async () => {
 
   console.log("Ejecutando revisión automática de tickets...");
 

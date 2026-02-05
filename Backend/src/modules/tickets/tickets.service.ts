@@ -3,7 +3,7 @@ import { Prisma, TicketStatus } from "@prisma/client";
 
 export class TicketsService {
 
-  // 🔥 Asignar ticket manualmente a un agente
+  // Asignar ticket manualmente a un agente
   static async asignarTicket(ticketId: number, agenteId: number) {
     const ticket = await prisma.ticket.findFirst({
       where: { id: ticketId, deletedAt: null }
@@ -29,7 +29,7 @@ export class TicketsService {
     });
   }
 
-  // 🔥 Resolver ticket y calcular tiempo de resolución
+  // Resolver ticket y calcular tiempo de resolución
   static async resolverTicket(ticketId: number) {
     const ticket = await prisma.ticket.findFirst({
       where: { id: ticketId, deletedAt: null }
@@ -57,7 +57,7 @@ export class TicketsService {
     });
   }
 
-  // ✅ Crear ticket con prioridad automática
+  //  Crear ticket con prioridad automática
   static async createTicket(data: Prisma.TicketUncheckedCreateInput) {
     const cliente = await prisma.cliente.findUnique({
       where: { id: data.clienteId }
@@ -72,7 +72,7 @@ export class TicketsService {
     });
   }
 
-  // ✅ Obtener tickets
+  //  Obtener tickets
   static async getTickets(query: any) {
     const { estado, prioridad, clienteId, desde, hasta, page = 1, limit = 10 } = query;
     const where: Prisma.TicketWhereInput = { deletedAt: null };
@@ -95,7 +95,7 @@ export class TicketsService {
     });
   }
 
-  // ✅ Obtener ticket por ID
+  //  Obtener ticket por ID
   static async getTicketById(id: number) {
     return prisma.ticket.findFirst({
       where: { id, deletedAt: null },
@@ -103,7 +103,7 @@ export class TicketsService {
     });
   }
 
-  // ✅ Actualizar ticket con reglas de negocio
+  //  Actualizar ticket con reglas de negocio
   static async updateTicket(id: number, data: Prisma.TicketUncheckedUpdateInput) {
     const ticket = await prisma.ticket.findFirst({ where: { id, deletedAt: null } });
     if (!ticket) throw new Error("Ticket no encontrado");
@@ -148,7 +148,7 @@ export class TicketsService {
     });
   }
 
-  // ✅ Soft delete
+  //  Soft delete
   static async deleteTicket(id: number) {
     const ticket = await prisma.ticket.findFirst({ where: { id, deletedAt: null } });
     if (!ticket) throw new Error("Ticket no encontrado");

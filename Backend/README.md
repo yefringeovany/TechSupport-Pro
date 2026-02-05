@@ -87,7 +87,8 @@ Request -> Middleware Auth -> Controller -> Service -> Prisma/DB -> Response
 
 ```bash
 # Clonar el repositorio
-git clone <url-del-repositorio>
+git clone https://github.com/yefringeovany/TechSupport-Pro.git
+
 cd Backend
 
 # Iniciar todos los servicios
@@ -132,8 +133,8 @@ DATABASE_URL="postgresql://postgres:postgres123@localhost:5432/techsupport_db?sc
 MONGODB_URI="mongodb://mongo:mongo123@localhost:27017/techsupport_logs?authSource=admin"
 
 # JWT Secrets (usar valores seguros en produccion)
-JWT_SECRET=tu_secret_jwt_super_seguro_aqui
-JWT_REFRESH_SECRET=tu_refresh_secret_super_seguro_aqui
+JWT_SECRET=tu_secret_jwt
+JWT_REFRESH_SECRET=tu_refresh_secret
 
 # Puerto del servidor (opcional, default: 3000)
 PORT=3000
@@ -336,7 +337,7 @@ Backend/
 
 3. **Notificaciones**: Las notificaciones al supervisor se simulan mediante logs. En produccion se integraria con un servicio de correo o notificaciones push.
 
-4. **Nivel de Agente**: Los niveles van de 1 (junior) a 3 (senior). Solo nivel 2+ puede atender tickets escalados.
+4. **Nivel de Agente**: Los niveles van de 1 a 3. Solo nivel 2+ puede atender tickets escalados.
 
 5. **Soft Delete**: Solo los tickets implementan soft delete. Clientes y agentes se eliminan fisicamente (considerar implementar soft delete si es necesario).
 
@@ -351,14 +352,6 @@ La coleccion de Postman se encuentra en el archivo `TechSupport-Pro.postman_coll
 - Ejemplos de requests y responses
 - Scripts de pre-request para manejar tokens automaticamente
 
-### Importar en Postman
-
-1. Abrir Postman
-2. Click en "Import"
-3. Seleccionar el archivo `TechSupport-Pro.postman_collection.json`
-4. La coleccion incluye variables de entorno que se actualizan automaticamente
-
----
 
 ## Librerias Utilizadas
 
@@ -380,6 +373,3 @@ La coleccion de Postman se encuentra en el archivo `TechSupport-Pro.postman_coll
 
 ---
 
-## Autor
-
-Desarrollado como prueba tecnica para posicion Backend Developer Node.js
