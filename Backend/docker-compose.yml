@@ -57,6 +57,9 @@ services:
       PORT: 3000
       DATABASE_URL: "postgresql://postgres:postgres123@postgres:5432/techsupport_db?schema=public"
       MONGODB_URI: "mongodb://mongo:mongo123@mongodb:27017/techsupport_logs?authSource=admin"
+      JWT_SECRET: "techsupport_jwt_secret_change_in_production_2026"
+      JWT_REFRESH_SECRET: "techsupport_refresh_secret_change_in_production_2026"
+      LOG_LEVEL: "info"
     depends_on:
       postgres:
         condition: service_healthy
@@ -66,7 +69,7 @@ services:
       - ./logs:/app/logs
     networks:
       - techsupport-network
-    command: sh -c "npx prisma migrate deploy && npm start"
+    command: sh -c "npx prisma migrate deploy && npx prisma db seed && npm start"
 
 volumes:
   postgres_data:

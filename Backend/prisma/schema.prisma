@@ -7,7 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 enum TicketStatus {
   ABIERTO
   EN_PROGRESO
@@ -35,24 +34,26 @@ enum RolUsuario {
 }
 
 model Cliente {
-  id        Int      @id @default(autoincrement())
-  nombre    String
-  email     String   @unique
-  tipo      TipoCliente
-  empresa   String?
+  id      Int         @id @default(autoincrement())
+  nombre  String
+  email   String      @unique
+  tipo    TipoCliente
+  empresa String?
 
-  tickets   Ticket[]
+  tickets Ticket[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model Agente {
-  id        Int      @id @default(autoincrement())
-  nombre    String
-  email     String   @unique
-  nivel     Int      // 1,2,3
-  activo    Boolean  @default(true)
+  id     Int     @id @default(autoincrement())
+  nombre String
+  email  String  @unique
+  nivel  Int // 1,2,3
+  activo Boolean @default(true)
+
+  user User?
 
   ticketsAsignados Ticket[]
 
@@ -60,31 +61,36 @@ model Agente {
 }
 
 model User {
-  id        Int       @id @default(autoincrement())
-  email     String    @unique
-  password  String
-  rol       RolUsuario
+  id       Int        @id @default(autoincrement())
+  email    String     @unique
+  password String
+  rol      RolUsuario
+
+  agenteId Int?    @unique
+  agente   Agente? @relation(fields: [agenteId], references: [id])
+
+  refreshToken String?
 
   createdAt DateTime @default(now())
 }
 
 model Ticket {
-  id          Int           @id @default(autoincrement())
+  id          Int    @id @default(autoincrement())
   titulo      String
   descripcion String
 
-  estado      TicketStatus  @default(ABIERTO)
-  prioridad   Prioridad     @default(MEDIA)
+  estado    TicketStatus @default(ABIERTO)
+  prioridad Prioridad    @default(MEDIA)
 
-  clienteId   Int
-  cliente     Cliente @relation(fields: [clienteId], references: [id])
+  clienteId Int
+  cliente   Cliente @relation(fields: [clienteId], references: [id])
 
-  agenteId    Int?
-  agente      Agente? @relation(fields: [agenteId], references: [id])
+  agenteId Int?
+  agente   Agente? @relation(fields: [agenteId], references: [id])
 
   nivelEscalamiento Int @default(1)
 
-  fechaResolucion DateTime?
+  fechaResolucion  DateTime?
   tiempoResolucion Int? // en minutos por ejemplo
 
   deletedAt DateTime?

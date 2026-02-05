@@ -24,20 +24,27 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Install production dependencies only
+# Copy package files and install all dependencies (needed for prisma and tsx)
 COPY package*.json ./
-RUN npm ci --only=production
+RUN npm ci
 
 # Copy built application and prisma
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 
+# Regenerate Prisma client in production stage
+RUN npx prisma generate
+
 # Create logs directory
 RUN mkdir -p /app/logs
 
 # Expose port
 EXPOSE 3000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:3000/api/health || exit 1
 
 # Start application
 CMD ["node", "dist/index.js"]

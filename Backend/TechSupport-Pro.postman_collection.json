@@ -1,0 +1,1357 @@
+{
+  "info": {
+    "_postman_id": "techsupport-pro-collection",
+    "name": "TechSupport Pro API",
+    "description": "Coleccion completa de endpoints para el sistema de gestion de tickets TechSupport Pro.\n\n## Instrucciones de Uso\n\n1. **Configurar Variables**: Asegurate de que la variable `baseUrl` apunte a tu servidor (por defecto: http://localhost:3000)\n\n2. **Autenticacion**:\n   - Primero ejecuta el endpoint \"Login\" con credenciales validas\n   - El token se guardara automaticamente en la variable `accessToken`\n   - El refresh token se guardara en `refreshToken`\n\n3. **Orden Recomendado**:\n   - Crear usuario admin (si no existe)\n   - Login\n   - Crear clientes\n   - Crear agentes\n   - Crear tickets\n   - Probar operaciones CRUD\n\n4. **Roles**:\n   - ADMIN: Acceso total\n   - SUPERVISOR: Gestiona tickets y agentes\n   - AGENTE: Solo sus tickets asignados\n\n## Variables de Entorno\n\n- `baseUrl`: URL del servidor\n- `accessToken`: Token JWT (se actualiza automaticamente)\n- `refreshToken`: Refresh token (se actualiza automaticamente)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "refreshToken",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health Check",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "health"]
+            },
+            "description": "Verifica el estado del servidor. No requiere autenticacion."
+          },
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/health",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "health"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"status\": \"ok\",\n  \"timestamp\": \"2026-02-04T12:00:00.000Z\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Autenticacion",
+      "item": [
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('accessToken', jsonData.accessToken);",
+                  "    pm.collectionVariables.set('refreshToken', jsonData.refreshToken);",
+                  "    console.log('Tokens guardados correctamente');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@techsupport.com\",\n  \"password\": \"admin123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "description": "Inicia sesion con email y password. Devuelve accessToken (15 min) y refreshToken (7 dias).\n\n**No requiere autenticacion**\n\n### Body:\n- email (string, requerido): Email del usuario\n- password (string, requerido): Contrasena del usuario\n\n### Response:\n- accessToken: Token JWT para autenticacion\n- refreshToken: Token para renovar el accessToken"
+          },
+          "response": [
+            {
+              "name": "Login Exitoso",
+              "originalRequest": {
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"admin@techsupport.com\",\n  \"password\": \"admin123\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/auth/login",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "auth", "login"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"accessToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n  \"refreshToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"\n}"
+            },
+            {
+              "name": "Credenciales Invalidas",
+              "originalRequest": {
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"wrong@email.com\",\n  \"password\": \"wrongpassword\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/auth/login",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "auth", "login"]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "body": "{\n  \"message\": \"Credenciales invalidas\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Refresh Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('accessToken', jsonData.accessToken);",
+                  "    console.log('Access token renovado');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/refresh",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "refresh"]
+            },
+            "description": "Renueva el accessToken usando el refreshToken.\n\n**No requiere autenticacion (usa refreshToken en el body)**\n\n### Body:\n- refreshToken (string, requerido): El refresh token obtenido en el login\n\n### Response:\n- accessToken: Nuevo token JWT"
+          },
+          "response": [
+            {
+              "name": "Token Renovado",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"accessToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Registrar Usuario",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"nuevo.agente@techsupport.com\",\n  \"password\": \"password123\",\n  \"rol\": \"AGENTE\",\n  \"agenteId\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "register"]
+            },
+            "description": "Registra un nuevo usuario en el sistema.\n\n**Requiere autenticacion: Solo ADMIN**\n\n### Body:\n- email (string, requerido): Email unico del usuario\n- password (string, requerido): Contrasena del usuario\n- rol (string, requerido): ADMIN | SUPERVISOR | AGENTE\n- agenteId (number, requerido si rol=AGENTE): ID del agente asociado"
+          },
+          "response": [
+            {
+              "name": "Usuario Creado",
+              "status": "Created",
+              "code": 201,
+              "body": "{\n  \"id\": 2,\n  \"email\": \"nuevo.agente@techsupport.com\",\n  \"rol\": \"AGENTE\",\n  \"agenteId\": 1,\n  \"createdAt\": \"2026-02-04T12:00:00.000Z\"\n}"
+            },
+            {
+              "name": "Usuario Ya Existe",
+              "status": "Bad Request",
+              "code": 400,
+              "body": "{\n  \"message\": \"El usuario ya existe\"\n}"
+            },
+            {
+              "name": "Sin Permisos",
+              "status": "Forbidden",
+              "code": 403,
+              "body": "{\n  \"message\": \"No tienes permisos para esta accion\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "logout"]
+            },
+            "description": "Cierra la sesion del usuario e invalida el refresh token.\n\n**Requiere autenticacion: Cualquier usuario autenticado**"
+          },
+          "response": [
+            {
+              "name": "Logout Exitoso",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"message\": \"Logout exitoso\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Tickets",
+      "item": [
+        {
+          "name": "Crear Ticket",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Error en sistema de facturacion\",\n  \"descripcion\": \"El sistema no permite generar facturas desde esta manana. Muestra error 500 al intentar guardar.\",\n  \"clienteId\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/tickets",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tickets"]
+            },
+            "description": "Crea un nuevo ticket. La prioridad se asigna automaticamente segun el tipo de cliente (VIP = ALTA, Normal = MEDIA).\n\n**Requiere autenticacion: ADMIN, SUPERVISOR, AGENTE**\n\n### Body:\n- titulo (string, requerido): Titulo del ticket (3-200 caracteres)\n- descripcion (string, requerido): Descripcion detallada (min 10 caracteres)\n- clienteId (number, requerido): ID del cliente"
+          },
+          "response": [
+            {
+              "name": "Ticket Creado",
+              "status": "Created",
+              "code": 201,
+              "body": "{\n  \"id\": 1,\n  \"titulo\": \"Error en sistema de facturacion\",\n  \"descripcion\": \"El sistema no permite generar facturas...\",\n  \"estado\": \"ABIERTO\",\n  \"prioridad\": \"ALTA\",\n  \"clienteId\": 1,\n  \"agenteId\": null,\n  \"nivelEscalamiento\": 1,\n  \"createdAt\": \"2026-02-04T12:00:00.000Z\",\n  \"cliente\": {\n    \"id\": 1,\n    \"nombre\": \"Empresa ABC\",\n    \"tipo\": \"VIP\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Listar Tickets",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/tickets?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tickets"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Numero de pagina (default: 1)"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Resultados por pagina (default: 10)"
+                },
+                {
+                  "key": "estado",
+                  "value": "ABIERTO",
+                  "disabled": true,
+                  "description": "Filtrar por estado: ABIERTO, EN_PROGRESO, RESUELTO, CERRADO, ESCALADO"
+                },
+                {
+                  "key": "prioridad",
+                  "value": "ALTA",
+                  "disabled": true,
+                  "description": "Filtrar por prioridad: BAJA, MEDIA, ALTA, URGENTE"
+                },
+                {
+                  "key": "clienteId",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Filtrar por ID de cliente"
+                },
+                {
+                  "key": "desde",
+                  "value": "2026-01-01",
+                  "disabled": true,
+                  "description": "Fecha inicio (YYYY-MM-DD)"
+                },
+                {
+                  "key": "hasta",
+                  "value": "2026-12-31",
+                  "disabled": true,
+                  "description": "Fecha fin (YYYY-MM-DD)"
+                }
+              ]
+            },
+            "description": "Lista todos los tickets con paginacion y filtros opcionales.\n\n**Requiere autenticacion: ADMIN, SUPERVISOR, AGENTE**\n\n### Query Parameters:\n- page: Numero de pagina\n- limit: Resultados por pagina\n- estado: Filtrar por estado\n- prioridad: Filtrar por prioridad\n- clienteId: Filtrar por cliente\n- desde: Fecha inicio\n- hasta: Fecha fin"
+          },
+          "response": [
+            {
+              "name": "Lista de Tickets",
+              "status": "OK",
+              "code": 200,
+              "body": "[\n  {\n    \"id\": 1,\n    \"titulo\": \"Error en sistema de facturacion\",\n    \"descripcion\": \"El sistema no permite generar facturas...\",\n    \"estado\": \"ABIERTO\",\n    \"prioridad\": \"ALTA\",\n    \"clienteId\": 1,\n    \"agenteId\": null,\n    \"nivelEscalamiento\": 1,\n    \"createdAt\": \"2026-02-04T12:00:00.000Z\",\n    \"cliente\": {\n      \"id\": 1,\n      \"nombre\": \"Empresa ABC\",\n      \"tipo\": \"VIP\"\n    },\n    \"agente\": null\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "Listar Tickets por Estado",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/tickets?estado=ESCALADO",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tickets"],
+              "query": [
+                {
+                  "key": "estado",
+                  "value": "ESCALADO"
+                }
+              ]
+            },
+            "description": "Lista tickets filtrados por estado ESCALADO."
+          },
+          "response": []
+        },
+        {
+          "name": "Listar Tickets VIP Urgentes",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/tickets?prioridad=ALTA&estado=ABIERTO",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tickets"],
+              "query": [
+                {
+                  "key": "prioridad",
+                  "value": "ALTA"
+                },
+                {
+                  "key": "estado",
+                  "value": "ABIERTO"
+                }
+              ]
+            },
+            "description": "Lista tickets de alta prioridad que estan abiertos (generalmente clientes VIP)."
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener Ticket por ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/tickets/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tickets", "1"]
+            },
+            "description": "Obtiene los detalles de un ticket especifico.\n\n**Requiere autenticacion: ADMIN, SUPERVISOR, AGENTE**"
+          },
+          "response": [
+            {
+              "name": "Ticket Encontrado",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"id\": 1,\n  \"titulo\": \"Error en sistema de facturacion\",\n  \"descripcion\": \"El sistema no permite generar facturas...\",\n  \"estado\": \"ABIERTO\",\n  \"prioridad\": \"ALTA\",\n  \"clienteId\": 1,\n  \"agenteId\": null,\n  \"nivelEscalamiento\": 1,\n  \"fechaResolucion\": null,\n  \"tiempoResolucion\": null,\n  \"createdAt\": \"2026-02-04T12:00:00.000Z\",\n  \"updatedAt\": \"2026-02-04T12:00:00.000Z\",\n  \"deletedAt\": null,\n  \"cliente\": {\n    \"id\": 1,\n    \"nombre\": \"Empresa ABC\",\n    \"tipo\": \"VIP\"\n  },\n  \"agente\": null\n}"
+            },
+            {
+              "name": "Ticket No Encontrado",
+              "status": "Not Found",
+              "code": 404,
+              "body": "{\n  \"message\": \"Ticket no encontrado\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Actualizar Ticket",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"EN_PROGRESO\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/tickets/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tickets", "1"]
+            },
+            "description": "Actualiza un ticket existente. Respeta la maquina de estados.\n\n**Requiere autenticacion: ADMIN, SUPERVISOR, AGENTE**\n\n### Body (todos opcionales):\n- titulo: Nuevo titulo\n- descripcion: Nueva descripcion\n- estado: Nuevo estado (debe respetar transiciones)\n- prioridad: Nueva prioridad\n\n### Transiciones de Estado Permitidas:\n- ABIERTO -> EN_PROGRESO\n- EN_PROGRESO -> RESUELTO\n- RESUELTO -> CERRADO\n- ESCALADO -> EN_PROGRESO"
+          },
+          "response": [
+            {
+              "name": "Ticket Actualizado",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"id\": 1,\n  \"titulo\": \"Error en sistema de facturacion\",\n  \"estado\": \"EN_PROGRESO\",\n  \"prioridad\": \"ALTA\",\n  \"updatedAt\": \"2026-02-04T12:30:00.000Z\"\n}"
+            },
+            {
+              "name": "Transicion No Permitida",
+              "status": "Bad Request",
+              "code": 400,
+              "body": "{\n  \"message\": \"No puedes cambiar un ticket de ABIERTO a CERRADO\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Asignar Ticket a Agente",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"agenteId\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/tickets/1/asignar",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tickets", "1", "asignar"]
+            },
+            "description": "Asigna un ticket a un agente especifico.\n\n**Requiere autenticacion: ADMIN, SUPERVISOR**\n\n### Body:\n- agenteId (number, requerido): ID del agente a asignar\n\n### Reglas:\n- Tickets ESCALADOS solo pueden ser asignados a agentes nivel 2 o superior"
+          },
+          "response": [
+            {
+              "name": "Ticket Asignado",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"id\": 1,\n  \"titulo\": \"Error en sistema de facturacion\",\n  \"agenteId\": 1,\n  \"agente\": {\n    \"id\": 1,\n    \"nombre\": \"Juan Perez\",\n    \"nivel\": 2\n  }\n}"
+            },
+            {
+              "name": "Agente Sin Nivel Suficiente",
+              "status": "Bad Request",
+              "code": 400,
+              "body": "{\n  \"message\": \"Un agente nivel 1 no puede tomar tickets escalados\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Resolver Ticket",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/tickets/1/resolver",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tickets", "1", "resolver"]
+            },
+            "description": "Marca un ticket como resuelto y calcula el tiempo de resolucion.\n\n**Requiere autenticacion: ADMIN, SUPERVISOR, AGENTE**\n\nEl tiempo de resolucion se calcula automaticamente desde la fecha de creacion."
+          },
+          "response": [
+            {
+              "name": "Ticket Resuelto",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"id\": 1,\n  \"titulo\": \"Error en sistema de facturacion\",\n  \"estado\": \"RESUELTO\",\n  \"fechaResolucion\": \"2026-02-04T14:00:00.000Z\",\n  \"tiempoResolucion\": 120\n}"
+            },
+            {
+              "name": "Ya Resuelto",
+              "status": "Bad Request",
+              "code": 400,
+              "body": "{\n  \"message\": \"El ticket ya esta resuelto\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Eliminar Ticket (Soft Delete)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/tickets/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tickets", "1"]
+            },
+            "description": "Elimina un ticket (soft delete - marca deletedAt).\n\n**Requiere autenticacion: ADMIN, SUPERVISOR**"
+          },
+          "response": [
+            {
+              "name": "Ticket Eliminado",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"message\": \"Ticket eliminado\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Clientes",
+      "item": [
+        {
+          "name": "Crear Cliente",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Empresa ABC S.A.\",\n  \"email\": \"contacto@empresaabc.com\",\n  \"tipo\": \"VIP\",\n  \"empresa\": \"Grupo ABC\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/clientes",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "clientes"]
+            },
+            "description": "Crea un nuevo cliente en el sistema.\n\n**Requiere autenticacion: ADMIN, SUPERVISOR**\n\n### Body:\n- nombre (string, requerido): Nombre del cliente\n- email (string, requerido): Email unico del cliente\n- tipo (string, requerido): VIP | NORMAL\n- empresa (string, opcional): Nombre de la empresa"
+          },
+          "response": [
+            {
+              "name": "Cliente Creado",
+              "status": "Created",
+              "code": 201,
+              "body": "{\n  \"id\": 1,\n  \"nombre\": \"Empresa ABC S.A.\",\n  \"email\": \"contacto@empresaabc.com\",\n  \"tipo\": \"VIP\",\n  \"empresa\": \"Grupo ABC\",\n  \"createdAt\": \"2026-02-04T12:00:00.000Z\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Crear Cliente Normal",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Tienda XYZ\",\n  \"email\": \"contacto@tiendaxyz.com\",\n  \"tipo\": \"NORMAL\",\n  \"empresa\": \"Comercial XYZ\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/clientes",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "clientes"]
+            },
+            "description": "Crea un cliente de tipo NORMAL."
+          },
+          "response": []
+        },
+        {
+          "name": "Listar Clientes",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/clientes",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "clientes"]
+            },
+            "description": "Lista todos los clientes registrados.\n\n**Requiere autenticacion: ADMIN, SUPERVISOR, AGENTE**"
+          },
+          "response": [
+            {
+              "name": "Lista de Clientes",
+              "status": "OK",
+              "code": 200,
+              "body": "[\n  {\n    \"id\": 1,\n    \"nombre\": \"Empresa ABC S.A.\",\n    \"email\": \"contacto@empresaabc.com\",\n    \"tipo\": \"VIP\",\n    \"empresa\": \"Grupo ABC\",\n    \"createdAt\": \"2026-02-04T12:00:00.000Z\"\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "Obtener Cliente por ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/clientes/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "clientes", "1"]
+            },
+            "description": "Obtiene los detalles de un cliente especifico.\n\n**Requiere autenticacion: ADMIN, SUPERVISOR, AGENTE**"
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar Cliente",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Empresa ABC S.A. de C.V.\",\n  \"tipo\": \"VIP\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/clientes/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "clientes", "1"]
+            },
+            "description": "Actualiza los datos de un cliente.\n\n**Requiere autenticacion: ADMIN, SUPERVISOR**"
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar Cliente",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/clientes/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "clientes", "1"]
+            },
+            "description": "Elimina un cliente del sistema.\n\n**Requiere autenticacion: Solo ADMIN**"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Agentes",
+      "item": [
+        {
+          "name": "Crear Agente Nivel 1",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Carlos Lopez\",\n  \"email\": \"carlos.lopez@techsupport.com\",\n  \"nivel\": 1,\n  \"activo\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/agentes",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "agentes"]
+            },
+            "description": "Crea un nuevo agente de soporte nivel 1 (junior).\n\n**Requiere autenticacion: Solo ADMIN**\n\n### Body:\n- nombre (string, requerido): Nombre del agente\n- email (string, requerido): Email unico del agente\n- nivel (number, requerido): 1, 2 o 3\n- activo (boolean, opcional): Estado del agente (default: true)\n\n### Niveles:\n- 1: Junior - No puede atender tickets escalados\n- 2: Mid - Puede atender tickets escalados\n- 3: Senior - Puede atender cualquier ticket"
+          },
+          "response": [
+            {
+              "name": "Agente Creado",
+              "status": "Created",
+              "code": 201,
+              "body": "{\n  \"id\": 1,\n  \"nombre\": \"Carlos Lopez\",\n  \"email\": \"carlos.lopez@techsupport.com\",\n  \"nivel\": 1,\n  \"activo\": true,\n  \"createdAt\": \"2026-02-04T12:00:00.000Z\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Crear Agente Nivel 2",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Maria Garcia\",\n  \"email\": \"maria.garcia@techsupport.com\",\n  \"nivel\": 2,\n  \"activo\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/agentes",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "agentes"]
+            },
+            "description": "Crea un agente nivel 2 que puede atender tickets escalados."
+          },
+          "response": []
+        },
+        {
+          "name": "Crear Agente Nivel 3",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Roberto Senior\",\n  \"email\": \"roberto.senior@techsupport.com\",\n  \"nivel\": 3,\n  \"activo\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/agentes",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "agentes"]
+            },
+            "description": "Crea un agente nivel 3 (senior)."
+          },
+          "response": []
+        },
+        {
+          "name": "Listar Agentes",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/agentes",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "agentes"]
+            },
+            "description": "Lista todos los agentes registrados.\n\n**Requiere autenticacion: ADMIN, SUPERVISOR**"
+          },
+          "response": [
+            {
+              "name": "Lista de Agentes",
+              "status": "OK",
+              "code": 200,
+              "body": "[\n  {\n    \"id\": 1,\n    \"nombre\": \"Carlos Lopez\",\n    \"email\": \"carlos.lopez@techsupport.com\",\n    \"nivel\": 1,\n    \"activo\": true,\n    \"createdAt\": \"2026-02-04T12:00:00.000Z\"\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "Obtener Agente por ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/agentes/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "agentes", "1"]
+            },
+            "description": "Obtiene los detalles de un agente especifico.\n\n**Requiere autenticacion: ADMIN, SUPERVISOR, AGENTE**"
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar Agente",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nivel\": 2,\n  \"activo\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/agentes/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "agentes", "1"]
+            },
+            "description": "Actualiza los datos de un agente (por ejemplo, promover de nivel).\n\n**Requiere autenticacion: ADMIN, SUPERVISOR**"
+          },
+          "response": []
+        },
+        {
+          "name": "Desactivar Agente",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"activo\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/agentes/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "agentes", "1"]
+            },
+            "description": "Desactiva un agente sin eliminarlo."
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar Agente",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/agentes/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "agentes", "1"]
+            },
+            "description": "Elimina un agente del sistema.\n\n**Requiere autenticacion: Solo ADMIN**"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Flujos de Prueba",
+      "item": [
+        {
+          "name": "1. Setup Inicial - Login Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('accessToken', jsonData.accessToken);",
+                  "    pm.collectionVariables.set('refreshToken', jsonData.refreshToken);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@techsupport.com\",\n  \"password\": \"admin123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "description": "Paso 1: Login con usuario admin para obtener tokens"
+          },
+          "response": []
+        },
+        {
+          "name": "2. Crear Cliente VIP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Banco Nacional\",\n  \"email\": \"soporte@banconacional.com\",\n  \"tipo\": \"VIP\",\n  \"empresa\": \"Grupo Financiero Nacional\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/clientes",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "clientes"]
+            },
+            "description": "Paso 2: Crear un cliente VIP que tendra SLA de 2 horas"
+          },
+          "response": []
+        },
+        {
+          "name": "3. Crear Agente Nivel 2",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Ana Martinez\",\n  \"email\": \"ana.martinez@techsupport.com\",\n  \"nivel\": 2,\n  \"activo\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/agentes",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "agentes"]
+            },
+            "description": "Paso 3: Crear agente nivel 2 que puede atender tickets escalados"
+          },
+          "response": []
+        },
+        {
+          "name": "4. Crear Ticket VIP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Sistema de transferencias caido\",\n  \"descripcion\": \"El modulo de transferencias no responde desde hace 30 minutos. Urgente resolver.\",\n  \"clienteId\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/tickets",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tickets"]
+            },
+            "description": "Paso 4: Crear ticket para cliente VIP (se asigna prioridad ALTA automaticamente)"
+          },
+          "response": []
+        },
+        {
+          "name": "5. Asignar Ticket al Agente",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"agenteId\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/tickets/1/asignar",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tickets", "1", "asignar"]
+            },
+            "description": "Paso 5: Asignar el ticket al agente creado"
+          },
+          "response": []
+        },
+        {
+          "name": "6. Cambiar Estado a En Progreso",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"EN_PROGRESO\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/tickets/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tickets", "1"]
+            },
+            "description": "Paso 6: Cambiar estado del ticket a EN_PROGRESO"
+          },
+          "response": []
+        },
+        {
+          "name": "7. Resolver Ticket",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/tickets/1/resolver",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tickets", "1", "resolver"]
+            },
+            "description": "Paso 7: Resolver el ticket (calcula tiempo de resolucion automaticamente)"
+          },
+          "response": []
+        },
+        {
+          "name": "8. Verificar Ticket Resuelto",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/tickets/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tickets", "1"]
+            },
+            "description": "Paso 8: Verificar que el ticket tiene fechaResolucion y tiempoResolucion"
+          },
+          "response": []
+        }
+      ],
+      "description": "Flujo completo de prueba: desde login hasta resolver un ticket VIP"
+    },
+    {
+      "name": "Pruebas de Errores",
+      "item": [
+        {
+          "name": "Sin Token - Error 401",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/tickets",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tickets"]
+            },
+            "description": "Prueba acceso sin token - debe retornar 401"
+          },
+          "response": [
+            {
+              "name": "Sin Autenticacion",
+              "status": "Unauthorized",
+              "code": 401,
+              "body": "{\n  \"message\": \"Token requerido\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Token Invalido - Error 401",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer token_invalido_123"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/tickets",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tickets"]
+            },
+            "description": "Prueba con token invalido - debe retornar 401"
+          },
+          "response": [
+            {
+              "name": "Token Invalido",
+              "status": "Unauthorized",
+              "code": 401,
+              "body": "{\n  \"message\": \"Token invalido\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Sin Permisos - Error 403",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"test@test.com\",\n  \"password\": \"test123\",\n  \"rol\": \"AGENTE\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "register"]
+            },
+            "description": "Prueba crear usuario sin ser ADMIN - debe retornar 403 (si no eres admin)"
+          },
+          "response": []
+        },
+        {
+          "name": "Validacion - Titulo muy corto",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"AB\",\n  \"descripcion\": \"Descripcion valida con mas de 10 caracteres\",\n  \"clienteId\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/tickets",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tickets"]
+            },
+            "description": "Prueba validacion - titulo debe tener al menos 3 caracteres"
+          },
+          "response": [
+            {
+              "name": "Error de Validacion",
+              "status": "Bad Request",
+              "code": 400,
+              "body": "{\n  \"errors\": [\"El titulo debe tener al menos 3 caracteres\"]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Transicion de Estado Invalida",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"CERRADO\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/tickets/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tickets", "1"]
+            },
+            "description": "Prueba transicion invalida: ABIERTO -> CERRADO no permitido"
+          },
+          "response": [
+            {
+              "name": "Transicion No Permitida",
+              "status": "Bad Request",
+              "code": 400,
+              "body": "{\n  \"message\": \"No puedes cambiar un ticket de ABIERTO a CERRADO\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Agente Nivel 1 en Ticket Escalado",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"agenteId\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/tickets/1/asignar",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tickets", "1", "asignar"]
+            },
+            "description": "Prueba asignar agente nivel 1 a ticket escalado - debe fallar"
+          },
+          "response": [
+            {
+              "name": "Nivel Insuficiente",
+              "status": "Bad Request",
+              "code": 400,
+              "body": "{\n  \"message\": \"Un agente nivel 1 no puede tomar tickets escalados\"\n}"
+            }
+          ]
+        }
+      ],
+      "description": "Pruebas de manejo de errores y validaciones"
+    }
+  ]
+}
