@@ -7,6 +7,8 @@ const logSchema = new mongoose.Schema({
   message: String,
   timestamp: { type: Date, default: Date.now },
   meta: mongoose.Schema.Types.Mixed
+}, {
+  collection: "application_logs"
 });
 
 // Evitar error de modelo duplicado

@@ -1,22 +1,24 @@
 import cron from "node-cron";
 import { prisma } from "../config/prisma.js";
 import { TicketStatus } from "@prisma/client";
+import { logInfo, logWarn, logError } from "../utils/logger.js";
 
-// Cron que corre cada minuto para revisar tickets
-cron.schedule("*/5 * * * *", async () => {
+// CRON → cada 1 minuto
+cron.schedule("* * * * *", async () => {
 
-  console.log("Ejecutando revisión automática de tickets...");
+  logInfo("Ejecutando revisión automática de tickets...");
 
   try {
 
-    // 🔹 Tiempos de producción
-    const hace2Horas = new Date(Date.now() - 2 * 60 * 60 * 1000); // VIP 2 horas
-    const hace24Horas = new Date(Date.now() - 24 * 60 * 60 * 1000); // NORMAL 24 horas
-    
+    //  TIEMPOS CORRECTOS
+    const hace2Horas = new Date(Date.now() - 2 * 60 * 60 * 1000);
+    const hace24Horas = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
-    // ===============================
-    // ESCALAR TICKETS VIP
-    // ===============================
+    /**
+     * ===============================
+     *  ESCALAR VIP (2 HORAS)
+     * ===============================
+     */
     const escalados = await prisma.ticket.updateMany({
       where: {
         deletedAt: null,
@@ -31,12 +33,16 @@ cron.schedule("*/5 * * * *", async () => {
     });
 
     if (escalados.count > 0) {
-      console.log(`Tickets VIP escalados automáticamente: ${escalados.count}`);
+      logWarn(" Tickets VIP escalados automáticamente", {
+        total: escalados.count
+      });
     }
 
-    // ===============================
-    // NOTIFICAR TICKETS NORMALES
-    // ===============================
+    /**
+     * ===============================
+     *  NORMALES -> SUPERVISOR (24H)
+     * ===============================
+     */
     const normales = await prisma.ticket.findMany({
       where: {
         deletedAt: null,
@@ -44,21 +50,23 @@ cron.schedule("*/5 * * * *", async () => {
         createdAt: { lte: hace24Horas },
         cliente: { tipo: "NORMAL" }
       },
-      select: {
-        id: true,
-        createdAt: true
-      }
+      select: { id: true }
     });
 
     if (normales.length > 0) {
-      console.log(`${normales.length} tickets normales sin atender por más de 5 minutos`);
-      normales.forEach(ticket => {
-        console.log(`Notificar supervisor -> Ticket ID: ${ticket.id}`);
+
+      const ids = normales.map(t => t.id);
+
+      logWarn(" Tickets normales sin atender — notificar supervisor", {
+        total: ids.length,
+        ticketIds: ids
       });
     }
 
   } catch (error) {
-    console.error("Error en cron de tickets:", error);
+
+    logError(" Error en cron de tickets", error);
+
   }
 
 });
