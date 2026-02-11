@@ -1,13 +1,11 @@
 import { PrismaClient } from '@prisma/client';
 
-// Declaración global para evitar múltiples instancias en desarrollo
+// Declaración global 
 declare global {
-  // eslint-disable-next-line no-var
   var prisma: PrismaClient | undefined;
 }
 
-// Singleton de Prisma Client
-// En desarrollo, evita crear múltiples instancias por hot-reload
+//Prisma Client
 export const prisma =
   global.prisma ||
   new PrismaClient({
