@@ -91,7 +91,7 @@ model Ticket {
   nivelEscalamiento Int @default(1)
 
   fechaResolucion  DateTime?
-  tiempoResolucion Int? // en minutos por ejemplo
+  tiempoResolucion Int? 
 
   deletedAt DateTime?
 
