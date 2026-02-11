@@ -28,7 +28,6 @@
     "skipLibCheck": true
   },
   
-  // ESTO ES LO QUE FALTABA PARA ARREGLAR EL ERROR DE DOCKER:
   "include": ["src/**/*"],
   "exclude": ["node_modules", "prisma", "dist", "test"]
 }
