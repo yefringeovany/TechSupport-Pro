@@ -26,12 +26,11 @@ export const validateTicket = (
     errors.push('La descripcion debe tener al menos 10 caracteres');
   }
 
-  // Validar clienteId
   if (!clienteId || typeof clienteId !== 'number') {
     errors.push('El clienteId es requerido y debe ser un numero');
   }
 
-  // Validar prioridad (opcional)
+  // Validar prioridad 
   if (req.body.prioridad) {
     const validPriorities = ['BAJA', 'MEDIA', 'ALTA', 'URGENTE'];
     if (!validPriorities.includes(req.body.prioridad)) {
@@ -57,7 +56,7 @@ export const validateTicketUpdate = (
 
   const errors: string[] = [];
 
-  // Validar titulo (si viene)
+  // Validar titulo
   if (titulo !== undefined) {
     if (typeof titulo !== 'string') {
       errors.push('El titulo debe ser un texto');
@@ -68,7 +67,7 @@ export const validateTicketUpdate = (
     }
   }
 
-  // Validar descripcion (si viene)
+  // Validar descripcion 
   if (descripcion !== undefined) {
     if (typeof descripcion !== 'string') {
       errors.push('La descripcion debe ser un texto');
@@ -85,7 +84,7 @@ export const validateTicketUpdate = (
     }
   }
 
-  // Validar estado (si viene)
+  // Validar estado 
   if (estado !== undefined) {
     const validStatuses = ['ABIERTO', 'EN_PROGRESO', 'RESUELTO', 'CERRADO', 'ESCALADO'];
     if (!validStatuses.includes(estado)) {
