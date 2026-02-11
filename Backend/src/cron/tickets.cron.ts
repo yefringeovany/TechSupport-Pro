@@ -3,22 +3,19 @@ import { prisma } from "../config/prisma.js";
 import { TicketStatus } from "@prisma/client";
 import { logInfo, logWarn, logError } from "../utils/logger.js";
 
-// CRON → cada 1 minuto
+// CRON cada 1 minuto
 cron.schedule("* * * * *", async () => {
 
   logInfo("Ejecutando revisión automática de tickets...");
 
   try {
 
-    //  TIEMPOS CORRECTOS
+    // TIEMPOS 
     const hace2Horas = new Date(Date.now() - 2 * 60 * 60 * 1000);
     const hace24Horas = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
-    /**
-     * ===============================
-     *  ESCALAR VIP (2 HORAS)
-     * ===============================
-     */
+
+    // ESCALAR VIP (2 HORAS)
     const escalados = await prisma.ticket.updateMany({
       where: {
         deletedAt: null,
@@ -38,11 +35,8 @@ cron.schedule("* * * * *", async () => {
       });
     }
 
-    /**
-     * ===============================
-     *  NORMALES -> SUPERVISOR (24H)
-     * ===============================
-     */
+    
+    //NORMALES SUPERVISOR (24H)
     const normales = await prisma.ticket.findMany({
       where: {
         deletedAt: null,
