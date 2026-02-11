@@ -21,7 +21,7 @@ router.get("/:id", authorizeRoles("ADMIN", "SUPERVISOR", "AGENTE"), TicketsContr
 // Actualizar ticket
 router.put("/:id", authorizeRoles("ADMIN", "SUPERVISOR", "AGENTE"), validateTicketUpdate, TicketsController.update);
 
-// Eliminar ticket (soft delete) - Solo Admin y Supervisor
+// Eliminar ticket - Solo Admin y Supervisor
 router.delete("/:id", authorizeRoles("ADMIN", "SUPERVISOR"), TicketsController.delete);
 
 // Asignar ticket a agente - Solo Admin y Supervisor
