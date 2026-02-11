@@ -4,12 +4,6 @@ import mongoose from 'mongoose';
 
 dotenv.config();
 
-/**
- * ================================
- * ENV VARIABLES
- * ================================
- */
-
 const DATABASE_URL = process.env.DATABASE_URL;
 const MONGODB_URI = process.env.MONGODB_URI;
 
@@ -20,12 +14,6 @@ if (!DATABASE_URL) {
 if (!MONGODB_URI) {
   throw new Error('MONGODB_URI no está definida en el .env');
 }
-
-/**
- * ================================
- * POSTGRESQL
- * ================================
- */
 
 export const postgresPool = new Pool({
   connectionString: DATABASE_URL,
@@ -43,12 +31,6 @@ export const connectPostgres = async () => {
   }
 };
 
-/**
- * ================================
- * MONGODB
- * ================================
- */
-
 export const connectMongo = async () => {
   try {
     await mongoose.connect(MONGODB_URI);
@@ -58,12 +40,6 @@ export const connectMongo = async () => {
     process.exit(1);
   }
 };
-
-/**
- * ================================
- * CONNECT ALL
- * ================================
- */
 
 export const connectDatabases = async () => {
   await connectPostgres();
