@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-import { ENV } from "../config/env.js"; // Asegúrate que la ruta sea correcta
+import { ENV } from "../config/env.js"; 
 
 interface JwtPayload {
   userId: number;
@@ -29,10 +29,8 @@ export const verifyToken = (
     });
   }
 
-  // Obtenemos el token separando "Bearer <token>"
   const token = authHeader.split(" ")[1];
 
-  // CORRECCIÓN: Validamos que el token realmente exista
   if (!token) {
     return res.status(401).json({
       message: "Formato de token inválido",
