@@ -127,7 +127,7 @@ async function main() {
 
   console.log('Usuarios creados:', { userAdmin, userSupervisor, userAgente });
 
-  // Crear algunos tickets de ejemplo
+  // Crear tickets de ejemplo
   const ticket1 = await prisma.ticket.create({
     data: {
       titulo: 'Error en sistema de facturacion',
