@@ -9,12 +9,7 @@ import "./config/env.js";
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-/**
- * ===============================
- * MIDDLEWARES
- * ===============================
- */
-
+ //MIDDLEWARES
 app.use(helmet());
 app.use(cors());
 app.use(compression());
@@ -33,12 +28,7 @@ app.use(limiter);
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 
-/**
- * ===============================
- * ROUTES
- * ===============================
- */
-
+ //ROUTES
 import ticketsRoutes from "./modules/tickets/tickets.routes.js";
 import clientesRoutes from "./modules/clients/clientes.routes.js";
 import agentesRoutes from "./modules/agents/agentes.routes.js";
@@ -49,22 +39,13 @@ app.use("/api/clientes", clientesRoutes);
 app.use("/api/agentes", agentesRoutes);
 app.use("/api/auth", authRoutes);
 
-/**
- * ===============================
- * HEALTH CHECK
- * ===============================
- */
 
+// HEALTH CHECK
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-/**
- * ===============================
- * ERROR HANDLER
- * ===============================
- */
-
+ //ERROR HANDLER
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.error('Error:', err);
   res.status(err.status || 500).json({
@@ -72,11 +53,7 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
   });
 });
 
-/**
- * ===============================
- * START SERVER
- * ===============================
- */
+ //START SERVER
 
 const startServer = async () => {
   try {
