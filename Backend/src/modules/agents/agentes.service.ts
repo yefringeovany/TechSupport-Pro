@@ -26,7 +26,6 @@ export class AgentesService {
   }
 
   async delete(id: number) {
-    // En lugar de borrar, desactivamos
     return prisma.agente.update({ where: { id }, data: { activo: false } });
   }
 }
