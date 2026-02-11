@@ -3,7 +3,7 @@ import { Prisma, TicketStatus } from "@prisma/client";
 
 export class TicketsService {
 
-  // Asignar ticket manualmente a un agente
+  // Asignar ticket a un agente
   static async asignarTicket(ticketId: number, agenteId: number) {
     const ticket = await prisma.ticket.findFirst({
       where: { id: ticketId, deletedAt: null }
@@ -17,7 +17,7 @@ export class TicketsService {
 
     if (!agente) throw new Error("Agente no existe");
 
-    // Validar regla: tickets escalados solo nivel >=2
+    // tickets escalados solo nivel >=2
     if (ticket.estado === TicketStatus.ESCALADO && agente.nivel === 1) {
       throw new Error("Un agente nivel 1 no puede tomar tickets escalados");
     }
@@ -108,7 +108,6 @@ export class TicketsService {
     const ticket = await prisma.ticket.findFirst({ where: { id, deletedAt: null } });
     if (!ticket) throw new Error("Ticket no encontrado");
 
-    // Validar máquina de estados
     const transiciones: Record<TicketStatus, TicketStatus[]> = {
       ABIERTO: [TicketStatus.EN_PROGRESO],
       EN_PROGRESO: [TicketStatus.RESUELTO],
@@ -133,7 +132,7 @@ export class TicketsService {
       }
     }
 
-    // Calcular tiempo de resolución si cambia a RESUELTO
+    // Calcular tiempo de resolución 
     if (data.estado === TicketStatus.RESUELTO && !ticket.fechaResolucion) {
       const ahora = new Date();
       const minutos = Math.floor((ahora.getTime() - ticket.createdAt.getTime()) / (1000 * 60));
