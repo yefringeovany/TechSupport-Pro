@@ -1,7 +1,7 @@
 import winston from 'winston';
 import mongoose from 'mongoose';
 
-// Schema para logs en MongoDB
+// Schema
 const logSchema = new mongoose.Schema({
   level: String,
   message: String,
@@ -11,10 +11,9 @@ const logSchema = new mongoose.Schema({
   collection: "application_logs"
 });
 
-// Evitar error de modelo duplicado
 const LogModel = mongoose.models.Log || mongoose.model('Log', logSchema);
 
-// Funcion para guardar log en MongoDB
+// Funcion para guardar logs
 const saveToMongoDB = async (level: string, message: string, meta?: object) => {
   try {
     if (mongoose.connection.readyState === 1) {
@@ -26,11 +25,10 @@ const saveToMongoDB = async (level: string, message: string, meta?: object) => {
       });
     }
   } catch (error) {
-    // Silenciar errores de MongoDB para no interrumpir el flujo
   }
 };
 
-// Formato personalizado para consola
+// Formato 
 const consoleFormat = winston.format.combine(
   winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
   winston.format.printf(({ level, message, timestamp }) => {
@@ -38,39 +36,33 @@ const consoleFormat = winston.format.combine(
   })
 );
 
-// Formato para archivos (JSON)
 const fileFormat = winston.format.combine(
   winston.format.timestamp(),
   winston.format.json()
 );
 
-// Crear logger de Winston
 const winstonLogger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
   transports: [
-    // Console transport
     new winston.transports.Console({
       format: consoleFormat
     }),
-    // File transport para errores
     new winston.transports.File({
       filename: 'logs/error.log',
       level: 'error',
       format: fileFormat,
-      maxsize: 5242880, // 5MB
+      maxsize: 5242880,
       maxFiles: 5
     }),
-    // File transport para todos los logs
     new winston.transports.File({
       filename: 'logs/combined.log',
       format: fileFormat,
-      maxsize: 5242880, // 5MB
+      maxsize: 5242880, 
       maxFiles: 5
     })
   ]
 });
 
-// Wrapper del logger que tambien guarda en MongoDB
 const logger = {
   info: (message: string, meta?: object) => {
     winstonLogger.info(message, meta);
@@ -90,7 +82,7 @@ const logger = {
   }
 };
 
-// Funciones helper para logging
+// Funciones helper
 export const logInfo = (message: string, meta?: object) => {
   logger.info(message, meta);
 };
@@ -114,7 +106,7 @@ export const logDebug = (message: string, meta?: object) => {
   logger.debug(message, meta);
 };
 
-// Log de acciones de tickets (para supervisor)
+
 export const logTicketAction = (action: string, ticketId: number, userId?: number, details?: object) => {
   logger.info(`Ticket Action: ${action}`, {
     action,
@@ -124,7 +116,6 @@ export const logTicketAction = (action: string, ticketId: number, userId?: numbe
   });
 };
 
-// Log de supervisor notification
 export const logSupervisorNotification = (message: string, ticketIds: number[]) => {
   logger.warn(`Supervisor Notification: ${message}`, {
     notificationType: 'supervisor_alert',
